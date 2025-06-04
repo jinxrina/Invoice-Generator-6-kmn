@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modern Invoice Generator</title>
+    <style>
+        :root {
+            /* Light theme variables */
+            --bg-primary: #f8f9ff;
+            --bg-secondary: #ffffff;
+            --text-primary: #333333;
+            --text-secondary: #666666;
+            --accent: #6366f1;
+            --accent-hover: #4f46e5;
+            --border: rgba(0, 0, 0, 0.1);
+            --shadow: rgba(99, 102, 241, 0.15);
+            --glass-bg: rgba(255, 255, 255, 0.7);
+            --input-bg: rgba(255, 255, 255, 0.9);
+            --table-header: #f1f5f9;
+            --danger: #ef4444;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --gradient-start: #c7d2fe;
+            --gradient-end: #e0e7ff;
+        }
+
+        [data-theme="dark"] {
+            /* Dark theme variables */
+            --bg-primary: #111827;
+            --bg-secondary: #1f2937;
+            --text-primary: #f3f4f6;
+            --text-secondary: #d1d5db;
+            --accent: #818cf8;
+            --accent-hover: #6366f1;
+            --border: rgba(255, 255, 255, 0.1);
+            --shadow: rgba(99, 102, 241, 0.25);
+            --glass-bg: rgba(31, 41, 55, 0.7);
+            --input-bg: rgba(31, 41, 55, 0.9);
+            --table-header: #374151;
+            --danger: #f87171;
+            --success: #34d399;
+            --warning: #fbbf24;
+            --gradient-start: #1f2937;
+            --gradient-end: #111827;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+        }
+        
+        body {
+            background: linear-gradient(135deg, var(--gradient-start) 0%, var(--gradient-end) 100%);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+        
+        .glassmorphism {
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            box-shadow: 0 10px 30px var(--shadow);
+        }
+        
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding: 25px;
+        }
+        
+        .logo-area {
+            display: flex;
+            align-items: center;
+        }
+        
+        .logo {
+            width: 50px;
+            height: 50px;
+            background: var(--accent);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+        }
+        
+        .title-area h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+            background: linear-gradient(to right, var(--accent), #a5b4fc);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        
+        .title-area p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+        
+        .theme-toggle {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 30px;
+            padding: 5px;
+            display: flex;
+            align-items: center;
+            position: relative;
+            cursor: pointer;
+            width: 80px;
+            height: 36px;
+        }
+        
+        .theme-toggle-track {
+            position: absolute;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: var(--accent);
+            left: 4px;
+            transition: transform 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+        
+        [data-theme="dark"] .theme-toggle-track {
+            transform: translateX(44px);
+        }
+        
+        .theme-icon {
+            font-size: 16px;
+        }
+        
+        .invoice-container {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+        
+        @media (min-width: 768px) {
+            .invoice-container {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+        
+        .section {
+            padding: 25px;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+        }
+        
+        .section:hover {
+            transform: translateY(-5px);
+        }
+        
+        h2 {
+            margin-bottom: 20px;
+            font-size: 1.3rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+        }
+        
+        h2 .icon {
+            margin-right: 10px;
+            background: var(--accent);
+            width: 30px;
+            height: 30px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 16px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+        
+        input, textarea, select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            background: var(--input-bg);
+            color: var(--text-primary);
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+        
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+        }
+        
+        .readonly {
+            background-color: var(--bg-primary);
+            cursor: not-allowed;
+        }
+        
+        .btn {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .btn:hover {
+            background: var(--accent-hover);
+            transform: translateY(-2px);
+        }
+        
+        .btn-add {
+            background: var(--success);
+        }
+        
+        .btn-add:hover {
+            background: var(--success);
+            filter: brightness(0.9);
+        }
+        
+        .btn-remove {
+            background: var(--danger);
+            padding: 8px 12px;
+            font-size: 0.9rem;
+        }
+        
+        .btn-remove:hover {
+            background: var(--danger);
+            filter: brightness(0.9);
+        }
+        
+        .btn-export {
+            background: var(--warning);
+        }
+        
+        .btn-export:hover {
+            background: var(--warning);
+            filter: brightness(0.9);
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        th, td {
+            padding: 15px;
+            text-align: left;
+        }
+        
+        th {
+            background-color: var(--table-header);
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        
+        td {
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .summary-table td:first-child {
+            font-weight: 500;
+        }
+        
+        .summary-table td:last-child {
+            text-align: right;
+            font-weight: 600;
+        }
+        
+        .total-row {
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: var(--accent);
+        }
+        
+        .actions {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .export-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        
+        @media (max-width: 767px) {
+            .actions {
+                flex-direction: column;
+            }
+            
+            .export-buttons {
+                width: 100%;
+                justify-content: space-between;
+            }
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.5s ease forwards;
+        }
+        
+        #invoice-preview {
+            display: none;
+            padding: 30px;
+            background: var(--bg-secondary);
+            margin-top: 30px;
+            box-shadow: 0 15px 35px var(--shadow);
+        }
+        
+        .preview-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 30px;
+        }
+        
+        .preview-company {
+            max-width: 60%;
+        }
+        
+        .preview-details {
+            text-align: right;
+        }
+        
+        .preview-items {
+            margin: 30px 0;
+        }
+        
+        .preview-summary {
+            width: 300px;
+            margin-left: auto;
+        }
+        
+        .item-row {
+            position: relative;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 10px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+        }
+        
+        .item-row:hover {
+            border-color: var(--accent);
+        }
+        
+        .item-inputs {
+            display: grid;
+            grid-template-columns: 3fr 1fr 1fr 1fr;
+            gap: 15px;
+            align-items: center;
+        }
+        
+        .item-total {
+            font-weight: 600;
+            color: var(--accent);
+        }
+        
+        .item-remove {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+        }
+        
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            
+            #invoice-preview, #invoice-preview * {
+                visibility: visible;
+            }
+            
+            #invoice-preview {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                display: block !important;
+                background: white !important;
+                color: black !important;
+            }
+        }
+        
+        /* Animations and effects */
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: var(--bg-primary);
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: var(--accent);
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--accent-hover);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="glassmorphism fade-in">
+            <div class="logo-area">
+                <div class="logo">🏛️</div>
+                <div class="title-area">
+                    <h1>MM Invoice Generator</h1>
+                    <p>Create stunning invoices in seconds</p>
+                    <p>Created By Kyaw Myo Naing</p>
+                </div>
+            </div>
+            <div class="theme-toggle" id="theme-toggle">
+                <div class="theme-toggle-track">
+                    <span class="theme-icon">☀️</span>
+                </div>
+            </div>
+        </header>
+        
+        <div class="invoice-container">
+            <div class="section glassmorphism fade-in">
+                <h2><span class="icon">🏢</span> Company Information</h2>
+                <div class="form-group">
+                    <label for="company-name">Company Name</label>
+                    <input type="text" id="company-name" class="readonly" value="To Day Fragrance - Perfume Decants Shop" readonly>
+                </div>
+                <div class="form-group">
+                    <label for="company-address">Company Address</label>
+                    <textarea id="company-address" rows="3" class="readonly" readonly>No. (82), 3rd Floor, Maha Thukha Road, Mingalar Taung Nyunt Township, Kyi Taw Ward, Myanmar</textarea>
+                </div>
+                <div class="form-group">
+                    <label for="company-contact">Contact Information</label>
+                    <input type="text" id="company-contact" class="readonly" value="Viber/Phone - 09787198239" readonly>
+                </div>
+            </div>
+            
+            <div class="section glassmorphism fade-in">
+                <h2><span class="icon">📄</span> Invoice Details</h2>
+                <div class="form-group">
+                    <label for="invoice-number">Invoice Number</label>
+                    <input type="text" id="invoice-number" class="readonly" readonly>
+                </div>
+                <div class="form-group">
+                    <label for="invoice-date">Date</label>
+                    <input type="date" id="invoice-date">
+                </div>
+                <div class="form-group">
+                    <label for="client-name">Client Name</label>
+                    <input type="text" id="client-name" placeholder="Enter client name">
+                </div>
+                <div class="form-group">
+                    <label for="client-address">Client Address</label>
+                    <textarea id="client-address" rows="3" placeholder="Enter client address"></textarea>
+                </div>
+            </div>
+        </div>
+        
+        <div class="section glassmorphism fade-in">
+            <h2><span class="icon">📦</span> Invoice Items</h2>
+            <div id="items-container">
+                <!-- Items will be added here dynamically -->
+                <div class="item-row">
+                    <div class="item-inputs">
+                        <input type="text" class="item-description" placeholder="Item description">
+                        <input type="number" class="item-quantity" value="1" min="1">
+                        <input type="number" class="item-price" value="0" min="0" placeholder="Price (MMK)">
+                        <div class="item-total">0 MMK</div>
+                    </div>
+                    <button class="btn btn-remove item-remove" onclick="removeItem(this)">✖</button>
+                </div>
+            </div>
+            <button class="btn btn-add" onclick="addItem()"><span>+</span> Add Item</button>
+        </div>
+        
+        <div class="section glassmorphism fade-in">
+            <h2><span class="icon">💰</span> Summary</h2>
+            <table class="summary-table">
+                <tr>
+                    <td>Subtotal</td>
+                    <td id="subtotal">0 MMK</td>
+                </tr>
+                <tr>
+                    <td>Tax (5%)</td>
+                    <td id="tax">0 MMK</td>
+                </tr>
+                <tr class="total-row">
+                    <td>Total</td>
+                    <td id="total">0 MMK</td>
+                </tr>
+            </table>
+            
+            <div class="actions">
+                <div class="export-buttons">
+                    <button class="btn btn-export" onclick="generatePDF()"><span>📑</span> Export as PDF</button>
+                    <button class="btn btn-export" onclick="generatePNG()"><span>🖼️</span> Export as PNG</button>
+                </div>
+                <button class="btn pulse" onclick="previewInvoice()"><span>👁️</span> Preview Invoice</button>
+            </div>
+        </div>
+        
+        <div id="invoice-preview" class="glassmorphism">
+            <div class="preview-header">
+                <div class="preview-company">
+                    <h2 id="preview-company-name"></h2>
+                    <p id="preview-company-address"></p>
+                    <p id="preview-company-contact"></p>
+                </div>
+                <div class="preview-details">
+                    <h2>INVOICE</h2>
+                    <p><strong>Invoice #:</strong> <span id="preview-invoice-number"></span></p>
+                    <p><strong>Date:</strong> <span id="preview-date"></span></p>
+                </div>
+            </div>
+            
+            <div class="preview-client">
+                <p><strong>Bill To:</strong></p>
+                <h3 id="preview-client-name"></h3>
+                <p id="preview-client-address"></p>
+            </div>
+            
+            <div class="preview-items">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Description</th>
+                            <th>Quantity</th>
+                            <th>Unit Price (MMK)</th>
+                            <th>Total (MMK)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="preview-items-body">
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="preview-summary">
+                <table>
+                    <tr>
+                        <td>Subtotal</td>
+                        <td id="preview-subtotal"></td>
+                    </tr>
+                    <tr>
+                        <td>Tax (5%)</td>
+                        <td id="preview-tax"></td>
+                    </tr>
+                    <tr class="total-row">
+                        <td>Total</td>
+                        <td id="preview-total"></td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <!-- CDN for html2canvas and jsPDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    
+    <script>
+        // Theme toggle functionality
+        const themeToggle = document.getElementById('theme-toggle');
+        const htmlElement = document.documentElement;
+        
+        // Check for saved theme preference or use system preference
+        const savedTheme = localStorage.getItem('theme') || 
+            (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        
+        // Set initial theme
+        setTheme(savedTheme);
+        
+        themeToggle.addEventListener('click', () => {
+            const currentTheme = htmlElement.getAttribute('data-theme') || 'light';
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            setTheme(newTheme);
+            localStorage.setItem('theme', newTheme);
+        });
+        
+        function setTheme(theme) {
+            if (theme === 'dark') {
+                htmlElement.setAttribute('data-theme', 'dark');
+                document.querySelector('.theme-icon').textContent = '🌙';
+            } else {
+                htmlElement.removeAttribute('data-theme');
+                document.querySelector('.theme-icon').textContent = '☀️';
+            }
+        }
+        
+        // Generate invoice number on page load
+        window.onload = function() {
+            generateInvoiceNumber();
+            document.getElementById('invoice-date').valueAsDate = new Date();
+            updateCalculations();
+        };
+        
+        // Generate a unique invoice number
+        function generateInvoiceNumber() {
+            const prefix = "INV";
+            const timestamp = new Date().getTime().toString().slice(-6);
+            const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+            const invoiceNumber = `${prefix}-${timestamp}-${random}`;
+            document.getElementById('invoice-number').value = invoiceNumber;
+        }
+        
+        // Add a new item row
+        function addItem() {
+            const container = document.getElementById('items-container');
+            const newItem = document.createElement('div');
+            newItem.className = 'item-row';
+            newItem.innerHTML = `
+                <div class="item-inputs">
+                    <input type="text" class="item-description" placeholder="Item description">
+                    <input type="number" class="item-quantity" value="1" min="1">
+                    <input type="number" class="item-price" value="0" min="0" placeholder="Price (MMK)">
+                    <div class="item-total">0 MMK</div>
+                </div>
+                <button class="btn btn-remove item-remove" onclick="removeItem(this)">✖</button>
+            `;
+            container.appendChild(newItem);
+            
+            // Add event listeners to new inputs
+            const inputs = newItem.querySelectorAll('input');
+            inputs.forEach(input => {
+                input.addEventListener('input', updateCalculations);
+            });
+            
+            // Apply fade-in animation
+            newItem.style.opacity = '0';
+            setTimeout(() => {
+                newItem.style.opacity = '1';
+                newItem.style.transition = 'opacity 0.3s ease';
+            }, 10);
+        }
+        
+        // Remove an item row
+        function removeItem(button) {
+            const container = document.getElementById('items-container');
+            if (container.children.length > 1) {
+                const item = button.closest('.item-row');
+                
+                // Apply fade-out animation
+                item.style.opacity = '0';
+                item.style.transition = 'opacity 0.3s ease';
+                
+                setTimeout(() => {
+                    item.remove();
+                    updateCalculations();
+                }, 300);
+            } else {
+                alert("You must have at least one item.");
+            }
+        }
+        
+        // Update all calculations
+        function updateCalculations() {
+            const items = document.querySelectorAll('.item-row');
+            let subtotal = 0;
+            
+            items.forEach(item => {
+                const quantity = parseInt(item.querySelector('.item-quantity').value) || 0;
+                const price = parseInt(item.querySelector('.item-price').value) || 0;
+                const total = quantity * price;
+                
+                item.querySelector('.item-total').textContent = formatCurrency(total);
+                subtotal += total;
+            });
+            
+            const tax = subtotal * 0.00;
+            const total = subtotal + tax;
+            
+            document.getElementById('subtotal').textContent = formatCurrency(subtotal);
+            document.getElementById('tax').textContent = formatCurrency(tax);
+            document.getElementById('total').textContent = formatCurrency(total);
+        }
+        
+        // Format currency in MMK
+        function formatCurrency(amount) {
+            return `${amount.toLocaleString()} MMK`;
+        }
+        
+        // Add event listeners to all inputs
+        document.querySelectorAll('input').forEach(input => {
+            input.addEventListener('input', updateCalculations);
+        });
+        
+        // Preview invoice
+        function previewInvoice() {
+            // Company information
+            document.getElementById('preview-company-name').textContent = document.getElementById('company-name').value;
+            document.getElementById('preview-company-address').textContent = document.getElementById('company-address').value;
+            document.getElementById('preview-company-contact').textContent = document.getElementById('company-contact').value;
+            
+            // Invoice details
+            document.getElementById('preview-invoice-number').textContent = document.getElementById('invoice-number').value;
+            const date = new Date(document.getElementById('invoice-date').value);
+            document.getElementById('preview-date').textContent = date.toLocaleDateString();
+            document.getElementById('preview-client-name').textContent = document.getElementById('client-name').value;
+            document.getElementById('preview-client-address').textContent = document.getElementById('client-address').value;
+            
+            // Items
+            const previewItemsBody = document.getElementById('preview-items-body');
+            previewItemsBody.innerHTML = '';
+            
+            const items = document.querySelectorAll('.item-row');
+            items.forEach(item => {
+                const description = item.querySelector('.item-description').value;
+                const quantity = item.querySelector('.item-quantity').value;
+                const price = item.querySelector('.item-price').value;
+                const total = item.querySelector('.item-total').textContent;
+                
+                const newRow = document.createElement('tr');
+                newRow.innerHTML = `
+                    <td>${description || 'Item'}</td>
+                    <td>${quantity}</td>
+                    <td>${formatCurrency(parseInt(price) || 0)}</td>
+                    <td>${total}</td>
+                `;
+                previewItemsBody.appendChild(newRow);
+            });
+            
+            // Summary
+            document.getElementById('preview-subtotal').textContent = document.getElementById('subtotal').textContent;
+            document.getElementById('preview-tax').textContent = document.getElementById('tax').textContent;
+            document.getElementById('preview-total').textContent = document.getElementById('total').textContent;
+            
+            // Show preview with animation
+            const preview = document.getElementById('invoice-preview');
+            preview.style.display = 'block';
+            preview.style.opacity = '0';
+            
+            setTimeout(() => {
+                preview.style.opacity = '1';
+                preview.style.transition = 'opacity 0.5s ease';
+                // Scroll to preview
+                preview.scrollIntoView({ behavior: 'smooth' });
+            }, 10);
+        }
+        
+        // Generate PDF
+        function generatePDF() {
+            previewInvoice();
+            
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF('p', 'mm', 'a4');
+            const invoiceElement = document.getElementById('invoice-preview');
+            
+            // Add a slight delay to ensure the preview is fully rendered
+            setTimeout(() => {
+                html2canvas(invoiceElement, {
+                    scale: 2,
+                    useCORS: true,
+                    logging: false
+                }).then(canvas => {
+                    const imgData = canvas.toDataURL('image/png');
+                    const imgWidth = 210;
+                    const pageHeight = 295;
+                    const imgHeight = canvas.height * imgWidth / canvas.width;
+                    let heightLeft = imgHeight;
+                    let position = 0;
+                    
+                    doc.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+                    heightLeft -= pageHeight;
+                    
+                    while (heightLeft >= 0) {
+                        position = heightLeft - imgHeight;
+                        doc.addPage();
+                        doc.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+                        heightLeft -= pageHeight;
+                    }
+                    
+                    const invoiceNumber = document.getElementById('invoice-number').value;
+                    doc.save(`Invoice-${invoiceNumber}.pdf`);
+                });
+            }, 500);
+        }
+        
+        // Generate PNG
+        function generatePNG() {
+            previewInvoice();
+            
+            // Add a slight delay to ensure the preview is fully rendered
+            setTimeout(() => {
+                const invoiceElement = document.getElementById('invoice-preview');
+                
+                html2canvas(invoiceElement, {
+                    scale: 2,
+                    useCORS: true,
+                    logging: false
+                }).then(canvas => {
+                    const link = document.createElement('a');
+                    const invoiceNumber = document.getElementById('invoice-number').value;
+                    link.download = `Invoice-${invoiceNumber}.png`;
+                    link.href = canvas.toDataURL('image/png');
+                    link.click();
+                });
+            }, 500);
+        }
+    </script>
+</body>
+</html>
